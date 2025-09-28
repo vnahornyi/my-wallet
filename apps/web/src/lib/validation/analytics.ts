@@ -53,3 +53,26 @@ export const AnalyticsSummaryResponseSchema = z.object({
 });
 
 export const AnalyticsErrorResponseSchema = ErrorResponseSchema;
+
+export const BudgetAnalyticsQuerySchema = AnalyticsSummaryQuerySchema.refine(
+  (data) => {
+    if (data.month) return true;
+    if (data.from && data.to) return true;
+    return false;
+  },
+  {
+    message: 'Provide either month or from/to range.',
+    path: ['month'],
+  }
+);
+
+export const BudgetAnalyticsItemSchema = z.object({
+  budgetId: z.string().uuid(),
+  categoryName: z.string(),
+  limit: z.number(),
+  spent: z.number(),
+  remaining: z.number(),
+  progress: z.number(),
+});
+
+export const BudgetAnalyticsResponseSchema = z.array(BudgetAnalyticsItemSchema);

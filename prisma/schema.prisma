@@ -16,6 +16,7 @@ model User {
   expenses       Expense[]
   categories     Category[]
   subscriptions  Subscription[]
+  budgets        Budget[]
 
   @@map("users")
 }
@@ -29,6 +30,7 @@ model Category {
   icon      String?
   createdAt DateTime   @default(now()) @map("created_at")
   expenses  Expense[]
+  budgets   Budget[]
 
   @@map("categories")
   @@index([userId])
@@ -47,6 +49,23 @@ model Expense {
 
   @@map("expenses")
   @@index([userId, date])
+  @@index([categoryId])
+}
+
+model Budget {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  amount     Decimal   @db.Decimal(18, 2)
+  period     String
+  startDate  DateTime  @map("start_date")
+  endDate    DateTime? @map("end_date")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("budgets")
+  @@index([userId])
   @@index([categoryId])
 }
 

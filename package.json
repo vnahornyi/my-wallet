@@ -8,8 +8,8 @@
   ],
   "scripts": {
     "generate": "prisma generate",
-    "migrate": "prisma migrate",
-    "start": "supabase start && npm run dev --workspace=web",
+    "migrate": "prisma migrate deploy",
+    "start": "supabase start && npm run migrate && npm run dev --workspace=web",
     "stop": "supabase stop"
   },
   "devDependencies": {
