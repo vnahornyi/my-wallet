@@ -8,35 +8,59 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  plan      String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  expenses  Expense[]
-  categories Category[]
+  id             String          @id @default(uuid())
+  email          String          @unique
+  name           String?
+  plan           String          @default("free")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  expenses       Expense[]
+  categories     Category[]
+  subscriptions  Subscription[]
+
+  @@map("users")
 }
 
 model Category {
-  id        String    @id @default(cuid())
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  id        String     @id @default(uuid())
+  userId    String?    @map("user_id")
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   name      String
-  color     String
+  color     String?
+  icon      String?
+  createdAt DateTime   @default(now()) @map("created_at")
   expenses  Expense[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+
+  @@map("categories")
+  @@index([userId])
 }
 
 model Expense {
-  id         String    @id @default(cuid())
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
+  categoryId String?   @map("category_id")
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId String?
   amount     Decimal   @db.Decimal(18, 2)
   note       String?
   date       DateTime
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("expenses")
+  @@index([userId, date])
+  @@index([categoryId])
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      String
+  status    String
+  startedAt DateTime @map("started_at")
+  expiresAt DateTime? @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("subscriptions")
+  @@index([userId])
+  @@unique([userId, status])
 }

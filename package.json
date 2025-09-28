@@ -7,7 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "supabase start && prisma migrate dev",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate",
+    "start": "supabase start && npm run dev --workspace=web",
     "stop": "supabase stop"
   },
   "devDependencies": {

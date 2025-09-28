@@ -3,13 +3,28 @@ import { createServerClient } from '@supabase/ssr';
 
 import type { Database } from './types';
 
-type CookieOptions = Record<string, unknown>;
+type CookieOptions = {
+  path?: string;
+  domain?: string;
+  maxAge?: number;
+  expires?: Date;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: 'lax' | 'strict' | 'none';
+};
 
-type SupabaseCookies = {
+type CookieMethods = {
   get: (name: string) => string | undefined;
+  getAll: () => Array<{ name: string; value: string }>;
   set: (name: string, value: string, options?: CookieOptions) => void;
   remove: (name: string, options?: CookieOptions) => void;
 };
+
+type CookieStore = Awaited<ReturnType<typeof cookies>>;
+
+function resolveCookieStore(): CookieStore {
+  return cookies() as unknown as CookieStore;
+}
 
 function getSupabaseConfig() {
   const supabaseUrl = process.env.SUPABASE_INTERNAL_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,28 +37,34 @@ function getSupabaseConfig() {
   return { supabaseUrl, supabaseAnonKey };
 }
 
-async function buildRouteCookies(): Promise<SupabaseCookies> {
-  const cookieStore = await cookies();
-
+function createMutableCookieMethods(): CookieMethods {
   return {
     get(name) {
-      return cookieStore.get(name)?.value;
+      return resolveCookieStore().get(name)?.value;
+    },
+    getAll() {
+      return resolveCookieStore()
+        .getAll()
+        .map((cookie) => ({ name: cookie.name, value: cookie.value }));
     },
     set(name, value, options) {
-      cookieStore.set({ name, value, ...(options ?? {}) });
+      resolveCookieStore().set({ name, value, ...(options ?? {}) });
     },
     remove(name, options) {
-      cookieStore.set({ name, value: '', ...(options ?? {}), maxAge: 0 });
+      resolveCookieStore().delete({ name, ...(options ?? {}) });
     }
   };
 }
 
-async function buildReadOnlyCookies(): Promise<SupabaseCookies> {
-  const cookieStore = await cookies();
-
+function createReadOnlyCookieMethods(): CookieMethods {
   return {
     get(name) {
-      return cookieStore.get(name)?.value;
+      return resolveCookieStore().get(name)?.value;
+    },
+    getAll() {
+      return resolveCookieStore()
+        .getAll()
+        .map((cookie) => ({ name: cookie.name, value: cookie.value }));
     },
     set() {
       throw new Error('Cannot set cookies in a read-only context.');
@@ -56,14 +77,16 @@ async function buildReadOnlyCookies(): Promise<SupabaseCookies> {
 
 export function createSupabaseRouteHandlerClient() {
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookies: buildRouteCookies()
+    cookies: createMutableCookieMethods()
   });
 }
 
 export function createSupabaseServerComponentClient() {
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
+
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookies: buildReadOnlyCookies()
+    cookies: createReadOnlyCookieMethods()
   });
 }

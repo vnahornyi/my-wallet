@@ -13,50 +13,50 @@ export type Database = {
         Row: {
           id: string;
           email: string;
-          plan: string | null;
+          name: string | null;
+          plan: string;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
           email: string;
-          plan?: string | null;
+          name?: string | null;
+          plan?: string;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
           email?: string;
-          plan?: string | null;
+          name?: string | null;
+          plan?: string;
           created_at?: string;
-          updated_at?: string;
         };
         Relationships: [];
       };
       categories: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
           name: string;
-          color: string;
+          color: string | null;
+          icon: string | null;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
-          user_id: string;
+          user_id?: string | null;
           name: string;
-          color: string;
+          color?: string | null;
+          icon?: string | null;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
-          user_id?: string;
+          user_id?: string | null;
           name?: string;
-          color?: string;
+          color?: string | null;
+          icon?: string | null;
           created_at?: string;
-          updated_at?: string;
         };
         Relationships: [
           {
@@ -76,7 +76,6 @@ export type Database = {
           note: string | null;
           date: string;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
@@ -86,7 +85,6 @@ export type Database = {
           note?: string | null;
           date: string;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
@@ -96,7 +94,6 @@ export type Database = {
           note?: string | null;
           date?: string;
           created_at?: string;
-          updated_at?: string;
         };
         Relationships: [
           {
@@ -113,10 +110,47 @@ export type Database = {
           }
         ];
       };
+      subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan: string;
+          status: string;
+          started_at: string;
+          expires_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          plan: string;
+          status: string;
+          started_at: string;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          plan?: string;
+          status?: string;
+          started_at?: string;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
-    Views: {};
-    Functions: {};
-    Enums: {};
-    CompositeTypes: {};
+    Views: object;
+    Functions: object;
+    Enums: object;
+    CompositeTypes: object;
   };
 };
