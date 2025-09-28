@@ -1,0 +1,17 @@
+{
+  "name": "my-wallet",
+  "private": true,
+  "packageManager": "npm@10.9.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "supabase start && prisma migrate dev",
+    "stop": "supabase stop"
+  },
+  "devDependencies": {
+    "supabase": "^2.45.5",
+    "prisma": "^6.16.2"
+  }
+}
